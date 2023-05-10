@@ -61,25 +61,33 @@ public class GroupMenu implements Menu {
 
     public void setParameter() { // 초기화할 때만 호출 가능
         while ( true ) {
-            GroupType groupType = chooseGroup();
 
-            // GroupType에 해당하는 group 객체를 찾아야 함
-            Group group = allGroups.find(groupType);
-            if (group != null && group.getParameter() != null) { // group.getParameter()이 null이 아니면 이미 초기화됨
-                System.out.println("\n" + group.getGroupType() + " group already exists.");
-                System.out.println("\n" + group);
-            } else {
-                Parameter parameter = new Parameter();// time, pay 사용자 입력받은 후, 설정 필요
-                System.out.println("Enter min time");
-                int time = Integer.parseInt(nextLine());
-                parameter.setMinTime(time);
+            try {
+                GroupType groupType = chooseGroup();
+                // GroupType에 해당하는 group 객체를 찾아야 함
+                Group group = allGroups.find(groupType);
+                if (group != null && group.getParameter() != null) { // group.getParameter()이 null이 아니면 이미 초기화됨
+                    System.out.println("\n" + group.getGroupType() + " group already exists.");
+                    System.out.println("\n" + group);
+                } else {
+                    Parameter parameter = new Parameter();// time, pay 사용자 입력받은 후, 설정 필요
+                    System.out.println("Enter min time");
+                    int time = Integer.parseInt(nextLine());
+                    parameter.setMinTime(time);
 
-                System.out.println("Enter min pay");
-                int pay = Integer.parseInt(nextLine());
-                parameter.setMinPay(pay);
+                    System.out.println("Enter min pay");
+                    int pay = Integer.parseInt(nextLine());
+                    parameter.setMinPay(pay);
 
-                group.setParameter(parameter);
-                allCustomers.refresh(allGroups); // 파라미터가 변경되었거나 추가되는 경우, 고객 분류를 다시 해야함
+                    group.setParameter(parameter);
+                    allCustomers.refresh(allGroups); // 파라미터가 변경되었거나 추가되는 경우, 고객 분류를 다시 해야함
+            }
+
+            }catch (InputEndException e){
+                System.out.println(Message.ERR_MSG_INPUT_END);
+                break;
+            } catch (NumberFormatException e){
+                System.out.println(Message.ERR_MSG_INVALID_INPUT_FORMAT);
             }
         }
     }
