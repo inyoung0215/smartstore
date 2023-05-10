@@ -61,22 +61,24 @@ public class GroupMenu implements Menu {
 
     public void setParameter() { // 초기화할 때만 호출 가능
         while ( true ) {
-            GroupType groupType = chooseGroup();
-            Group group = allGroups.find(groupType);
 
-            if (group != null && group.getParameter() != null) { // group.getParameter()이 null이 아니면 이미 초기화됨
-                System.out.println("\n" + group.getGroupType() + " group already exists.");
-                System.out.println("\n" + group);
-            } else {
-                Parameter parameter = new Parameter();
-                if(group == null){
-                    group = new Group(groupType);
-                    allGroups.add(group);
+                GroupType groupType = chooseGroup();
+                Group group = allGroups.find(groupType);
+
+                if (group != null && group.getParameter() != null) { // group.getParameter()이 null이 아니면 이미 초기화됨
+                    System.out.println("\n" + group.getGroupType() + " group already exists.");
+                    System.out.println("\n" + group);
+                } else {
+                    Parameter parameter = new Parameter();
+                    if(group == null){
+                        group = new Group(groupType);
+                        allGroups.add(group);
+                    }
+
+                    group.setParameter(parameter);
+                    allCustomers.refresh(allGroups);
                 }
 
-                group.setParameter(parameter);
-                allCustomers.refresh(allGroups);
-            }
         }
     }
 
