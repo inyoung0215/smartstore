@@ -3,10 +3,15 @@ package smartstore.menu;
 import smartstore.customer.Customer;
 import smartstore.customer.Customers;
 import smartstore.exception.EmptyArrayException;
+import smartstore.exception.InputEndException;
 import smartstore.exception.InputRangeException;
+import smartstore.group.Groups;
 import smartstore.util.Message;
 
+
 public class CustomerMenu implements Menu {
+    private final Groups allGroups = Groups.getInstance();
+    private final Customers allCustomers = Customers.getInstance();
     // singleton
     private static CustomerMenu customerMenu;
 
@@ -38,15 +43,21 @@ public class CustomerMenu implements Menu {
         }
     }
 
+
     public void addCustomer(){
+
         System.out.println("Enter customer name: ");
         String name = nextLine();
-
         System.out.println("Enter customer ID: ");
         String id = nextLine();
-
-        System.out.println("Enter total time spent by customer: ");
-        int time = 0;
+        for (int i = 0; i < allCustomers.size(); i++){
+            if (allCustomers.get(i).getCusId().equals(id)){
+                System.out.println("ID already exists");
+                return;
+            }
+        }
+        System.out.println("Enter total time");
+        int time;
         while (true) {
             try {
                 time = Integer.parseInt(nextLine());
@@ -59,7 +70,7 @@ public class CustomerMenu implements Menu {
             }
         }
 
-        System.out.println("Enter total pay made by customer: ");
+        System.out.println("Enter total pay");
         int pay;
         while (true) {
             try {
@@ -73,20 +84,100 @@ public class CustomerMenu implements Menu {
             }
         }
 
+
         Customer customer = new Customer(name, id, time, pay);
+        allCustomers.add(customer);
+        allCustomers.refresh(customer);
+        System.out.println("** Add SUCCESS **" + customer);
+
     }
     public void viewCustomer() {
         try {
-            System.out.println(Customers.getInstance());
+            for (int i = 0; i < allCustomers.size(); i++){
+                System.out.println(allCustomers.get(i).toString());
+            }
         } catch (EmptyArrayException e){
             System.out.println(Message.ERR_MSG_NULL_ARR_ELEMENT);
         }
     }
 
     public void updateCustomer(){
+        Customer customer = null;
 
-    }
-    public void deleteCustomer(){
+            System.out.println("Enter customer ID: ");
+            String id = scanner.nextLine();
+
+            for (int i = 0; i < allCustomers.size(); i++) {
+                if (id != null && allCustomers.get(i).getCusId().equals(id)) {
+                    customer = allCustomers.get(i);
+                    System.out.println(customer.toString());
+                    break;
+                }
+            }
+            if (customer == null) {
+                System.out.println("cutomer ID does not exist");
+                return;
+            }
+
+
+            System.out.println("***** Choose Update *****");
+            while (true) {
+                try {
+                    int choice = chooseMenu(new String[]{
+                            "Customer Name",
+                            "Customer Total Time",
+                            "Customer Total Pay",
+                            "Back"});
+
+                    if (choice == 1) {
+                        System.out.println("Update customer Name : ");
+                        String setName = scanner.nextLine();
+                        customer.setCusName(setName);
+                    }
+                    else if (choice == 2) {
+                        System.out.println("Update customer Total time : ");
+                        int setTime = Integer.parseInt(scanner.nextLine());
+                        customer.setCusTotalTime(setTime);
+                    } else if (choice == 3) {
+                        System.out.println("Update customer Total Pay : ");
+                        int setPay = Integer.parseInt(scanner.nextLine());
+                        customer.setCusTotalPay(setPay);
+                    } else break;
+                    System.out.println(customer.toString());
+                } catch (InputEndException e){
+                    System.out.println(Message.ERR_MSG_INPUT_END);
+                }
+
+            }
+            allCustomers.refresh(allGroups);
+        }
+
+
+    public void deleteCustomer() {
+
+            System.out.println("Enter customer ID : ");
+            String id = scanner.nextLine();
+            int index = -1;
+            try {
+                for (int i = 0; i < allCustomers.size(); i++) {
+                    if (id != null && allCustomers.get(i).getCusId().equals(id)) {
+                        index = i;
+                        break;
+                    }
+                }
+            } catch (EmptyArrayException e) {
+                System.out.println(Message.ERR_MSG_INVALID_ARR_EMPTY);
+            }
+
+            if (index == -1) {
+                System.out.println("customer ID does not exist");
+
+            }
+            try {
+                System.out.println("**Delete Success**" + allCustomers.pop(index));
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println(Message.ERR_MSG_INVALID_ARR_INDEX);
+            }
 
     }
 }

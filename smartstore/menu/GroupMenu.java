@@ -4,6 +4,7 @@ package smartstore.menu;
 import smartstore.customer.Customers;
 import smartstore.exception.EmptyArrayException;
 import smartstore.exception.InputEndException;
+import smartstore.exception.InputRangeException;
 import smartstore.group.Group;
 import smartstore.group.GroupType;
 import smartstore.group.Groups;
@@ -61,9 +62,8 @@ public class GroupMenu implements Menu {
 
     public void setParameter() { // 초기화할 때만 호출 가능
         while ( true ) {
-
-            try {
                 GroupType groupType = chooseGroup();
+                if (groupType == null){break;}
                 // GroupType에 해당하는 group 객체를 찾아야 함
                 Group group = allGroups.find(groupType);
                 if (group != null && group.getParameter() != null) { // group.getParameter()이 null이 아니면 이미 초기화됨
@@ -72,23 +72,38 @@ public class GroupMenu implements Menu {
                 } else {
                     Parameter parameter = new Parameter();// time, pay 사용자 입력받은 후, 설정 필요
                     System.out.println("Enter min time");
-                    int time = Integer.parseInt(nextLine());
+                    int time;
+                    while (true) {
+                        try {
+                            time = Integer.parseInt(nextLine());
+                            if (time < 0) throw new InputRangeException(); // 시간 값이 음수일 경우 예외 처리
+                            break;
+                        } catch (NumberFormatException e) {
+                            System.out.println(Message.ERR_MSG_INVALID_INPUT_FORMAT);
+                        } catch (InputRangeException e) {
+                            System.out.println(Message.ERR_MSG_INVALID_INPUT_RANGE);
+                        }
+                    }
                     parameter.setMinTime(time);
 
                     System.out.println("Enter min pay");
-                    int pay = Integer.parseInt(nextLine());
+                    int pay;
+                    while (true) {
+                        try {
+                            pay = Integer.parseInt(nextLine());
+                            if (pay < 0) throw new InputRangeException(); // 결제 값이 음수일 경우 예외 처리
+                            break;
+                        } catch (NumberFormatException e) {
+                            System.out.println(Message.ERR_MSG_INVALID_INPUT_FORMAT);
+                        } catch (InputRangeException e) {
+                            System.out.println(Message.ERR_MSG_INVALID_INPUT_RANGE);
+                        }
+                    }
                     parameter.setMinPay(pay);
 
                     group.setParameter(parameter);
                     allCustomers.refresh(allGroups); // 파라미터가 변경되었거나 추가되는 경우, 고객 분류를 다시 해야함
-            }
-
-            }catch (InputEndException e){
-                System.out.println(Message.ERR_MSG_INPUT_END);
-                break;
-            } catch (NumberFormatException e){
-                System.out.println(Message.ERR_MSG_INVALID_INPUT_FORMAT);
-            }
+                }
         }
     }
 
@@ -117,10 +132,10 @@ public class GroupMenu implements Menu {
 
                 while (true) {
                     try {
-                        System.out.print("Enter minimum time (integer): ");
+                        System.out.print("Enter minimum time :");
                         int minTime = Integer.parseInt(nextLine(Message.END_MSG));
 
-                        System.out.print("Enter minimum pay (integer): ");
+                        System.out.print("Enter minimum pay : ");
                         int minPay = Integer.parseInt(nextLine(Message.END_MSG));
 
                         group.getParameter().setMinTime(minTime);
